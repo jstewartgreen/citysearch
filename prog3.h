@@ -10,6 +10,22 @@
 #include <cctype>
 #include <cstring>
 
+struct cdata
+{
+
+		char* name;
+		char* ascii;
+		float lat;
+		float lon;
+		char* country;
+		char* abbrev1;
+		char* abbrev2;
+		char* admin;
+		int pop;
+		char* ID;
+};
+
+
 class city
 {
 	public:
@@ -17,23 +33,15 @@ class city
 		~city();
 		bool match(char key[]);//returns true if the city's name matches the key arg, false otherwise;
 		bool display();//outputs data to user;
-		bool copy(city &empty);//copies its contents into arg;
-		bool matchid(int ID);//returns true if ID arg matches ID field;	
-		char* ascii;//name in ASCII
+		bool incopy(cdata &origin);//copies args contents into itself;
+		bool matchid(char ID[]);//returns true if ID arg matches ID field;	
+		bool outcopy(cdata &dest);//copies private data into empty cdata arg;
+		
 		city* next;
-
+	
 	private:
-		char* name;
-		char lat[13];
-		char lon[13];
-		char* country;
-		char* abbrev1;
-		char* abbrev2;
-		char* admin;
-		int code;
-		char capital;
-		int pop;
-		int ID;
+
+		cdata data;	
 };
 
 
@@ -42,18 +50,22 @@ class table
 {
 	public:
 	
-		table(int size);
+		table();
 		~table();
-		bool search(char key[], city &empty);
-		bool add(city $toadd);
+		bool search(char key[], cdata* &empty);
+		bool add(cdata& toadd);
 		bool remove(char key[]);		
-		bool retrieve(city &empty);	
+		bool retrieve(char key[], cdata* &empty);	
 		bool IDsearch(int ID);	
-	private:
-		city** hashtable;
-		int hash(char key[]);
-		void displayall();
+		bool load();
+		bool save();
 		
+	private:
+		
+		city** hashtable;
+		int size = 1997;	
+		int hashfxn(char key[]);
+		void displayall();
+		void efficiency();
 };
-
 
