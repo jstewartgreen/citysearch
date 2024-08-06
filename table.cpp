@@ -10,13 +10,12 @@
 
 using namespace std;
 
-table::table()
+table::table(int size)
 {
+	size = size;	
 	hashtable = new city*[size];
 	for(int i = 0; i < size; ++i)
 		hashtable[i] = nullptr;
-
-
 
 }
 
@@ -48,14 +47,15 @@ table::~table()
 int table::hashfxn(char key[])
 {
 	int hash;
-	int length = strlen(key);
+	int length = strlen(key);	
+	char* temp = new char[strlen(key)+1];
+	strcpy(temp, key);
 
-	for (int i = 1; i < length; ++i)
+	for (int i = 0; i < length; ++i)
 	{	
-		key[i] = tolower(key[i]);		
-		hash += key[i];
+		hash += temp[i];
 	}
-	hash *= key[0]*length;
+	hash *= temp[0];//*length;
 	hash %= size;
 	return hash;
 	
@@ -68,8 +68,9 @@ bool table::search(char key[], cdata* &empty)
 {
 	int hash = hashfxn(key);
 	int hits {0};//number of times a city appears; 
-	city* current;
-	
+
+	city* current = nullptr;
+
 	if(!hashtable[hash]) return false;
 	
 	current = hashtable[hash];
@@ -77,12 +78,29 @@ bool table::search(char key[], cdata* &empty)
 	{
 		if(current->match(key))	
 		{
+			cout << "Match found:" << endl;	
 			current->display();
-			++ hits;
+			++hits;
 		}
 		current = current->next;
+			
 	}
-	
+/*	
+	empty = new cdata[hits];
+	int i = 0;	
+	current = hashtable[hash];
+
+	while (current && i < hits)
+	{
+		if(current->match(key))	
+		{
+			current->outcopy(empty[i]);
+			++i;		
+		}
+		current = current->next;
+			
+	}
+*/	
 	if(hits == 0) return false;	
 	return true;
 
@@ -92,31 +110,55 @@ bool table::search(char key[], cdata* &empty)
 
 bool table::add(cdata &toadd)
 {
+	char* term = new char[0];
 	int hash = hashfxn(toadd.ascii);
 	city* hold = nullptr;
 		
 
-	if(!hashtable[hash])
-	{
-		hashtable[hash] = new city;
-		hashtable[hash]->incopy(toadd);	
-		hashtable[hash]->next = nullptr;
-	}else
-	{
-		hold = hashtable[hash];
-		hashtable[hash] = new city;
-		hashtable[hash]->incopy(toadd);	
-		hashtable[hash]->next = hold;
-	}			
+	hold = 	hashtable[hash];
+	hashtable[hash] = new city;
+	hashtable[hash]->incopy(toadd);
+	hashtable[hash]->next = hold;
+			
 
-	
+	delete [] term;	
 	return true;
 }
 
 
 
 
-bool table::remove(char key[]){return true;}
+bool table::remove(char key[])
+{
+	int hash = hashfxn(key);
+	city* current;
+	city* prev;
+	if(!hashtable[hash])
+		return false;
+
+	current = hashtable[hash];
+
+	if(current->match(key))
+	{
+		hashtable[hash] = current->next;
+		delete current;
+	}else
+	{
+		while(current && !current->match(key))
+		{
+			prev = current;
+			current = current->next;
+		}
+		if(!current) return false;
+		else
+		{
+			prev->next = current->next;
+			delete current;
+		}
+	}
+			
+	return true;
+}
 		
 
 
@@ -127,7 +169,7 @@ bool table::retrieve(char key[], cdata* &empty)
 
 
 
-bool table::IDsearch(int ID){return true;}
+bool table::IDsearch(char ID[]){return true;}
 
 
 
@@ -154,21 +196,24 @@ void table::displayall()
 bool table::load()
 {
 	ifstream filein;
+	//ofstream fileout;
 	cdata empty;
 	char temp[100];
-	
+//	int length;	
 	filein.open("world_cities_data.txt");
+//	fileout.open("names.txt");	
 	if(!filein)
 		return false;
 
 		
 
-	filein.ignore(120, '\n');	
-	
+	filein.ignore(200, '\n');	
+//	temp[0] = '\0';	
+
 	while(!filein.eof())
 	{
 //name
-//		
+		
 		filein.get(temp, 100, ',');
 		filein.ignore(100, ',');		
 		empty.name = new char[strlen(temp)+1];
@@ -181,7 +226,13 @@ bool table::load()
 		empty.ascii = new char[strlen(temp)+1];
 		strcpy(empty.ascii, temp);	
 		temp[0] = '\0';
+	
+//		length = strlen(empty.ascii);	
+//		for(int i = 0; i < length; ++i)
+//			empty.ascii[i] = toupper(empty.ascii[i]);
 
+
+//		fileout << empty.ascii << ',';
 //latitude
 		filein >> empty.lat;
 		filein.ignore(100, ',');
@@ -192,12 +243,14 @@ bool table::load()
 //country
 		filein.get(temp, 100, ',');
 		filein.ignore(100, ',');		
+
 		empty.country = new char[strlen(temp)+1];
 		strcpy(empty.country, temp);
 		temp[0] = '\0';
 //abbrev1
 		filein.get(temp, 100, ',');
 		filein.ignore(100, ',');		
+	
 		empty.abbrev1 = new char[strlen(temp)+1];
 		strcpy(empty.abbrev1, temp);
 		temp[0] = '\0';
@@ -235,12 +288,12 @@ bool table::load()
 		delete [] empty.abbrev2;
 		delete [] empty.admin;
 		delete [] empty.ID;	
-//		++i;	
 
 	}
 	displayall();
-//	efficiency();
+	efficiency();
 	filein.close();
+//	fileout.close();
 	return true;
 }
 

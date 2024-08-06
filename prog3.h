@@ -50,13 +50,13 @@ class table
 {
 	public:
 	
-		table();
+		table(int size);
 		~table();
 		bool search(char key[], cdata* &empty);
 		bool add(cdata& toadd);
 		bool remove(char key[]);		
 		bool retrieve(char key[], cdata* &empty);	
-		bool IDsearch(int ID);	
+		bool IDsearch(char ID[]);	
 		bool load();
 		bool save();
 		

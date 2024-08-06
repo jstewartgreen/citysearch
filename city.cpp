@@ -12,6 +12,13 @@ using namespace std;
 city::city()
 {
 	next = nullptr;
+	data.name = nullptr;
+	data.ascii = nullptr;
+	data.country = nullptr;
+	data.abbrev1 = nullptr;
+	data.abbrev2 = nullptr;
+	data.admin = nullptr;
+	data.ID = nullptr;	
 	data.lat = 0;
 	data.lon = 0;
 	data.pop = 0;
@@ -37,6 +44,7 @@ city::~city()
 //returns true if the city's name matches the key arg, false otherwise;
 bool city::match(char key[])
 {
+	
 	if(strcmp(key, data.ascii) != 0) return false;
 	return true;
 }
@@ -52,7 +60,7 @@ bool city::display()
 		<< "Abbreviation 2: " << data.abbrev2 << endl
 		<< "Admin: " << data.admin << endl
 		<< "Population: " << data.pop << endl
-		<< "ID #: " << data.ID << endl;
+		<< "ID #: " << data.ID << endl << endl;
 	return true;
 }
 
